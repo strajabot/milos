@@ -16,6 +16,6 @@ int timer_destroy_periodic(uint64_t id);
 time_t timer_get_time();
 
 timer_t* timer_alloc(); 
-void timer_write();
+void timer_update_req();
 
 #endif //!TIMER_H

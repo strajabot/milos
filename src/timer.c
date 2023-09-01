@@ -53,10 +53,8 @@ uint64_t timer_create(time_t delay)
 		iter->next = timer;
 		timer->next = next;
 		timer_update_req();
-
+		return timer->timer_id;
 	}
-
-	//todo: implement;
 }
 
 uint64_t timer_create_periodic(time_t period)
@@ -76,7 +74,6 @@ time_t timer_get_time()
 
 void timer_interrupt()
 {
-	//todo: implement;
 	//time += read_mtime();
 	//remove head of list;
 	timer_update_req();
