@@ -1,40 +1,46 @@
 OUTPUT_ARCH( "riscv" )
 ENTRY( entry )
 
+
 SECTIONS
 {
-  /*
-   * ensure that entry.S / _entry is at 0x80000000,
-   */
   . = 0x80000000;
+  kernel_start = .;
 
+  text_start = .;
   .text : {
-    *(.entry_os) . = ALIGN(0x1000);
+    *(.entry)
+    . = ALIGN(0x1000);
     *(.text .text.*)
     . = ALIGN(0x1000);
-    PROVIDE(etext = .);
+    
   }
+  text_end = .;
 
   .rodata : {
     . = ALIGN(16);
-    *(.srodata .srodata.*) /* do not need to distinguish this from .rodata */
+    *(.srodata .srodata.*)
     . = ALIGN(16);
     *(.rodata .rodata.*)
   }
 
+  . = ALIGN(16);
+  data_start = .;
   .data : {
-    . = ALIGN(16);
-    *(.sdata .sdata.*) /* do not need to distinguish this from .data */
+    *(.sdata .sdata.*)
     . = ALIGN(16);
     *(.data .data.*)
   }
+  data_end = .;
 
+  . = ALIGN(16);
+  bss_start = .;
   .bss : {
-    . = ALIGN(16);
-    *(.sbss .sbss.*) /* do not need to distinguish this from .bss */
+    *(.sbss .sbss.*)
     . = ALIGN(16);
     *(.bss .bss.*)
   }
+  bss_end = .;
 
-  PROVIDE(end = .);
+  kernel_end = .;
 }

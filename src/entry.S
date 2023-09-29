@@ -1,5 +1,6 @@
 .globl entry
 
+.section .entry
 .align 4
 entry: 
     #Entry to the OS, All Harts start here
