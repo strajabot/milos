@@ -1,7 +1,8 @@
 #ifndef RISCV_H
 #define RISCV_H
 
-#include "stdint.h"
+#include "hw.h"
+#include "types.h"
 
 //mhartid register helpers
 inline uint64_t read_mhartid();
@@ -77,16 +78,14 @@ inline uint64_t read_mcause();
 inline uint64_t read_mtval();
 
 //mtime register helpers
-inline uint64_t read_mtime();
+inline time_t read_mtime();
 inline void write_mtime(time_t mtime);
 
 //mtimecmp register helpers
-inline uint64_t read_mtimecmp();
-inline void write_mtimecmp(time_t mtimecmp);
-
+inline time_t read_mtimecmp(uint64_t hart_id);
+inline void write_mtimecmp(uint64_t hart_id, time_t mtimecmp);
 
 //sstatus register helpers
-
 #define SSTATUS_SIE 	0x0000000000000002
 #define SSTATUS_SPIE 	0x0000000000000020
 #define SSTATUS_SPP 	0x0000000000000100
@@ -98,10 +97,8 @@ inline void mask_clear_sstatus(uint64_t mask);
 
 inline uint64_t read_sepc();
 inline void write_sepc(uint64_t sepc);
-//
 
-// inline cursedness begins here
-
+//implementation starts here
 inline uint64_t read_mhartid() 
 {
 	uint64_t mhartid;
@@ -266,28 +263,24 @@ inline uint64_t read_mtval()
 	return mtval;
 }
 
-inline uint64_t read_mtime()
+inline time_t read_mtime()
 {
-	//uint64_t mtime;
-	//asm volatile("csrr %0, mtime": "=r"(mtime));
-	//return mtime;
+	return *CLINT_MTIME;
 }
 
-inline void write_mtime(uint64_t mtime)
+inline void write_mtime(time_t mtime)
 {
-	//asm volatile("csrw mtime, %0": : "r"(mtime));
+	*CLINT_MTIME = mtime;
 }
 
-inline uint64_t read_mtimecmp()
-{
-	//uint64_t mtimecmp;
-	//asm volatile("csrr %0, mtimecmp": "=r"(mtimecmp));
-	//return mtimecmp;
+inline time_t read_mtimecmp(uint64_t hart_id)
+{	
+	return *CLINT_MTIMECMP(hart_id);
 }
 
-inline void write_mtimecmp(uint64_t mtimecmp)
+inline void write_mtimecmp(uint64_t hart_id, time_t mtimecmp)
 {
-	//asm volatile("csrw mtimecmp, %0": : "r"(mtimecmp));
+	*CLINT_MTIMECMP(hart_id) = mtimecmp;
 }
 
 inline uint64_t read_sstatus()
