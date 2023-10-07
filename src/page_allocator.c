@@ -1,6 +1,6 @@
 #include "../h/page_allocator.h"
 
-#include "../h/stdint.h"
+#include "../h/types.h"
 #include "../h/hw.h"
 
 static free_page_t* free_list = NULL;

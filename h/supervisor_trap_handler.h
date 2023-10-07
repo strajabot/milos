@@ -1,7 +1,7 @@
 #ifndef SUPERVISOR_TRAP_HANDLER
 #define SUPERVISOR_TRAP_HANDLER
 
-#include "stdint.h"
+#include "types.h"
 
 #define SBI_MALLOC			0x0000000000000010
 #define SBI_FREE			0x0000000000000011

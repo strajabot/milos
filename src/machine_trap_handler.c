@@ -1,6 +1,5 @@
 #include "../h/machine_trap_handler.h"
 
-#include "../h/stdint.h"
 #include "../h/riscv.h"
 #include "../h/timer.h"
 
