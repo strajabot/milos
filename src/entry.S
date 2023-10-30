@@ -29,23 +29,20 @@ entry:
     #Each hart gets it's own aligned stack;
     la sp, __stack_space
     andi sp, sp, ~0b1111
-    li a2, 0
-    call _start
     
     csrr a0, mhartid
     ld t0, __stack_size
     andi t0, t0, ~0b1111;
     
-    li t1, 0
+    mv t1, zero
 loop:
-    beq a0, t1, 
+    beq a0, t1, done
     add sp, sp, t0
     addi t1, t1, 1
     j loop;
 
-done: 
-    #Stack setup is done for this hart call C start(uint64 hart_id);
-    csrr a0, mhartid
+done:
+    #Stack is initialized, jump to C
     call start;
 
     wfi

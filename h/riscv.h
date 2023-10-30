@@ -95,6 +95,11 @@ inline void write_sstatus(uint64_t sstatus);
 inline void mask_set_sstatus(uint64_t mask);
 inline void mask_clear_sstatus(uint64_t mask);
 
+//sscratch register helpers
+inline uint64_t read_sscratch();
+inline void write_sscratch(uint64_t sscratch);
+
+//sepc register helpers
 inline uint64_t read_sepc();
 inline void write_sepc(uint64_t sepc);
 
@@ -303,6 +308,18 @@ inline void mask_set_sstatus(uint64_t mask)
 inline void mask_clear_sstatus(uint64_t mask)
 {
 	asm volatile("csrc sstatus, %0": : "r"(mask));
+}
+
+inline uint64_t read_sscratch()
+{
+	uint64_t sscratch;
+	asm volatile("csrr %0, sscratch": "=r"(sscratch));
+	return sscratch;
+}
+
+inline void write_sscratch(uint64_t sscratch)
+{
+	asm volatile("csrw sscratch, %0": : "r"(sscratch));
 }
 
 inline uint64_t read_sepc()

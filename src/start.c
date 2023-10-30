@@ -3,14 +3,19 @@
 #include "../h/main.h"
 
 
-void start(uint64_t hart_id)
+void start()
 {
+	//Machine mode
 
 	//delegate all interrupts to supervisor mode;
 	write_mideleg(0xFFFFFFFFFFFFFFFF);
 	
-	
-	main(0, NULL);
+	//Hart ID is passed to Supervisor thru sscratch
+	write_sscratch(read_mhartid());
+
+	//TODO: Switch to Supervisor Mode into main();
+
+	main();
 
 	return;
 }
