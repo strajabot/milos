@@ -5,7 +5,7 @@
 #include "../h/types.h"
 
 
-static uint32_t list_lock = 0;
+static volatile uint32_t mutex = 0;
 
 static free_frame_t* free_list = NULL;
 
@@ -16,7 +16,7 @@ static inline free_frame_t* next_frame(free_frame_t* frame)
 
 void frame_allocator_init()
 {
-	lock(&list_lock);
+	lock(&mutex);
 	
 	free_list = (free_frame_t*) HEAP_START_ALIGNED;
 	free_list->next = NULL;
@@ -31,22 +31,22 @@ void frame_allocator_init()
 	}
 	frame->next = NULL;
 
-	unlock(&list_lock);
+	unlock(&mutex);
 }
 
 void* frame_alloc()
 {
-	lock(&list_lock);
+	lock(&mutex);
 
 	if(!free_list) 
 	{
-		unlock(&list_lock);
+		unlock(&mutex);
 		return NULL;
 	}
 	free_frame_t* frame = free_list;
 	free_list = free_list->next;
 	
-	unlock(&list_lock);
+	unlock(&mutex);
 	
 	return frame;
 }
@@ -55,12 +55,12 @@ void frame_free(void *ptr)
 {
 	ptr = PAGE_FLOOR(ptr);
 	
-	lock(&list_lock);
+	lock(&mutex);
 
 	free_frame_t* frame = (free_frame_t*) ptr;
 	frame->next = free_list;
 	free_list = frame;
 
-	unlock(&list_lock);
+	unlock(&mutex);
 }
 

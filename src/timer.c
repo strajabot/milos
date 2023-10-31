@@ -5,7 +5,7 @@
 #include "../h/riscv.h"
 #include "../h/spinlock.h"
 
-static uint32_t timer_lck = 0;
+static volatile uint32_t mutex = 0;
 static uint64_t timer_id = 0;
 
 //sorted list of (unscheduled) timer interrupt requests
@@ -22,7 +22,7 @@ uint64_t timer_create(time_t delay)
 	
 	time_t curr_time = timer_get_time();
 
-	lock(&timer_lck);
+	lock(&mutex);
 
 	timer->id = timer_id++;
 	timer->end = curr_time + delay;
@@ -31,7 +31,7 @@ uint64_t timer_create(time_t delay)
 	
 	timer_add(timer);
 
-	unlock(&timer_lck);
+	unlock(&mutex);
 	return timer->id;
 }
 
@@ -44,7 +44,7 @@ uint64_t timer_create_periodic(time_t period)
 	
 	time_t curr_time = timer_get_time();
 
-	lock(&timer_lck);
+	lock(&mutex);
 
 	timer->id = timer_id++;
 	timer->end = curr_time + period;
@@ -53,13 +53,13 @@ uint64_t timer_create_periodic(time_t period)
 	
 	timer_add(timer);
 
-	unlock(&timer_lck);
+	unlock(&mutex);
 	return timer->id;
 }
 
 int timer_destroy_periodic(uint64_t id)
 {
-	lock(&timer_lck);
+	lock(&mutex);
 
 	for(int iter=0; iter<HART_CNT; iter++)
 	{
@@ -69,7 +69,7 @@ int timer_destroy_periodic(uint64_t id)
 			kfree(hart_timer[iter]);
 			hart_timer[iter] = NULL;
 			timer_sched(iter);
-			unlock(&timer_lck);
+			unlock(&mutex);
 			return 0;
 		}
 	}
@@ -83,7 +83,7 @@ int timer_destroy_periodic(uint64_t id)
 		//remove from list head
 		timer_list = timer_list->next; 
 		kfree(prev);
-		unlock(&timer_lck);
+		unlock(&mutex);
 		return 0;
 	}
 	
@@ -93,12 +93,12 @@ int timer_destroy_periodic(uint64_t id)
 		if(iter->id == id) {
 			prev->next = iter->next;
 			kfree(iter);
-			unlock(&timer_lck);
+			unlock(&mutex);
 			return 0;
 		}
 	}
 
-	unlock(&timer_lck);
+	unlock(&mutex);
 	return -1;
 }
 
