@@ -7,15 +7,29 @@ void start()
 {
 	//Machine mode
 
-	//delegate all interrupts to supervisor mode;
+	//Flush everything in TLB;
+	sfence_vma_all();
+	//Disable address translation;
+	write_satp(0x0000000000000000);
+	//Flush everything in TLB;
+	sfence_vma_all();
+
+	//delegate interrupts and exceptions to Supervisor mode;
 	write_mideleg(0xFFFFFFFFFFFFFFFF);
-	
-	//Hart ID is passed to Supervisor thru sscratch
+	write_medeleg(0xFFFFFFFFFFFFFFFF);	
+
+	//Hart ID is passed to Supervisor via sscratch;
 	write_sscratch(read_mhartid());
 
-	//TODO: Switch to Supervisor Mode into main();
+	//Setup drop to Supervisor mode;
+	mask_clear_mstatus(MSTATUS_MPP);
+	mask_set_mstatus(MSTATUS_MPP_SUPERVISOR);
 
-	main();
+	//Setup jump to main; 
+	write_sepc(main);
 
+	//Drop to supervisor, jump to main();
+	mret();
+	
 	return;
 }

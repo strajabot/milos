@@ -7,6 +7,12 @@
 //mhartid register helpers
 inline uint64_t read_mhartid();
 
+#define MSTATUS_MPP				0x0000000000001800
+#define MSTATUS_MPP_MACHINE		0x0000000000001800
+#define MSTATUS_MPP_SUPERVISOR	0x0000000000000800
+#define MSTATUS_MPP_USER		0x0000000000000000
+#define MSTATUS_MIE				0x0000000000000008
+
 //mstatus register helpers
 inline uint64_t read_mstatus();
 inline void write_mstatus(uint64_t mstatus);
@@ -85,6 +91,9 @@ inline void write_mtime(time_t mtime);
 inline time_t read_mtimecmp(uint64_t hart_id);
 inline void write_mtimecmp(uint64_t hart_id, time_t mtimecmp);
 
+//mret instruction wrapper
+inline void mret();
+
 //sstatus register helpers
 #define SSTATUS_SIE 	0x0000000000000002
 #define SSTATUS_SPIE 	0x0000000000000020
@@ -100,8 +109,14 @@ inline uint64_t read_sscratch();
 inline void write_sscratch(uint64_t sscratch);
 
 //sepc register helpers
-inline uint64_t read_sepc();
-inline void write_sepc(uint64_t sepc);
+inline void* read_sepc();
+inline void write_sepc(void* sepc);
+
+//satp register helpers
+inline void* read_satp();
+inline void write_satp(void* satp);
+
+inline void sfence_vma_all();
 
 //implementation starts here
 inline uint64_t read_mhartid() 
@@ -288,6 +303,11 @@ inline void write_mtimecmp(uint64_t hart_id, time_t mtimecmp)
 	*CLINT_MTIMECMP(hart_id) = mtimecmp;
 }
 
+inline void mret()
+{
+	asm volatile ("mret");
+}
+
 inline uint64_t read_sstatus()
 {
 	uint64_t sstatus;
@@ -322,18 +342,33 @@ inline void write_sscratch(uint64_t sscratch)
 	asm volatile("csrw sscratch, %0": : "r"(sscratch));
 }
 
-inline uint64_t read_sepc()
+inline void* read_sepc()
 {
-	uint64_t sepc;
+	void* sepc;
 	asm volatile("csrr %0, sepc": "=r"(sepc));
 	return sepc;
 }
 
-inline void write_sepc(uint64_t sepc)
+inline void write_sepc(void* sepc)
 {
 	asm volatile("csrw sepc, %0": : "r"(sepc));
 }
 
+inline void* read_satp()
+{
+	void* satp;
+	asm volatile("csrr %0, satp": "=r"(satp));
+	return satp;
+}
 
+inline void write_satp(void* satp)
+{
+	asm volatile("csrw sepc, %0": : "r"(satp));
+}
+
+inline void sfence_vma_all()
+{
+	asm volatile("sfence.vma x0, x0");
+}
 
 #endif // !RISCV_H

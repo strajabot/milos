@@ -13,7 +13,7 @@ uint64_t supervisor_internal_trap_handler(
 	uint64_t a7) 
 {
 	uint64_t sstatus = read_sstatus();
-	uint64_t pc = read_sepc();
+	uint64_t pc = (uint64_t) read_sepc();
 	const uint64_t code = a0;
 
 	switch (code) {

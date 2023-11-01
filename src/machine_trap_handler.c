@@ -14,7 +14,7 @@ uint64_t machine_internal_trap_handler(
 	uint64_t a7) 
 {
 	uint64_t sstatus = read_sstatus();
-	uint64_t pc = read_sepc();
+	uint64_t pc = (uint64_t)read_sepc();
 
 	const uint64_t code = a7;
 	switch(code) {
@@ -35,7 +35,7 @@ uint64_t machine_internal_trap_handler(
 		break;
 	}
 
-	write_sepc(pc + 4);
+	write_sepc((void*)(pc + 4));
 	write_sstatus(sstatus);
 	
 	return a0;

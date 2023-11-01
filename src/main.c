@@ -6,8 +6,8 @@ int main()
 {
 	//Supervisor Mode
 	//Important: Machine Mode passes Hart ID thru sscratch
+	uint64_t hart_id = read_sscratch();
 
-	read_mhartid();
 	frame_allocator_init();	
 		
 	return -4;
