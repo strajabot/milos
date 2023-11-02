@@ -190,15 +190,15 @@ void timer_supervisor_intr()
 	//remove head of list;
 }
 
-void machine_timer_write(uint32_t hart_id, timer_t* timer)
+void machine_timer_write(uint32_t hart_id, time_t end)
 {
-	write_mtimecmp(hart_id, timer);
+	write_mtimecmp(hart_id, end);
 	mask_set_mie(MACHINE_TIMER_INTR_MASK);
 }
 
 void timer_machine_intr()
 {
-	write_mtimecmp(hart_id, UINT64_MAX);
+	write_mtimecmp(read_mhartid(), UINT64_MAX);
 	mask_clear_mie(MACHINE_TIMER_INTR_MASK);
-	mask_set_mip(SUPERVISOR_SOFT_INTR_MASK);
+	mask_set_mip(SUPERVISOR_TIMER_INTR_MASK);
 }
