@@ -34,6 +34,13 @@ inline void write_mideleg(uint64_t mideleg);
 inline void mask_set_mideleg(uint64_t mask);
 inline void mask_clear_mideleg(uint64_t mask);
 
+#define SUPERVISOR_SOFT_INTR_MASK	0x0000000000000002
+#define MACHINE_SOFT_INTR_MASK		0x0000000000000008
+#define SUPERVISOR_TIMER_INTR_MASK	0x0000000000000020
+#define MACHINE_TIMER_INTR_MASK		0x0000000000000080
+#define SUPERVISOR_EXT_INTR_MASK	0x0000000000000200
+#define MACHINE_EXT_INTR_MASK		0x0000000000000800
+
 //mip register helpers
 inline uint64_t read_mip();
 inline void write_mip(uint64_t mip);
@@ -177,7 +184,6 @@ inline void mask_clear_medeleg(uint64_t mask)
 	asm volatile("csrc medeleg, %0": : "r"(mask));
 }
 
-
 inline uint64_t read_mideleg()
 {
 	uint64_t mideleg;
@@ -199,7 +205,6 @@ inline void mask_clear_mideleg(uint64_t mask)
 {
 	asm volatile("csrc mideleg, %0": : "r"(mask));
 }
-
 
 inline uint64_t read_mip()
 {
