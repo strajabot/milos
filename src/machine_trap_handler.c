@@ -13,37 +13,48 @@ uint64_t machine_internal_trap_handler(
 	uint64_t a6, 
 	uint64_t a7) 
 {
-	uint64_t sstatus = read_sstatus();
-	uint64_t pc = (uint64_t)read_sepc();
+	uint64_t mstatus = read_mstatus();
+	uint64_t pc = (uint64_t)read_mepc();
 
 	const uint64_t code = a7;
-	switch(code) {
-		case REQ_TIMER_INTERRUPT:
-			a0 = timer_create(a1);
-		break;
-
-		case REQ_PERIODIC_INTERRUPT:
-			a0 = timer_create_periodic(a1);
-		break;
-		
-		case STOP_PERIODIC_INTERRUPT:
-			a0 = (uint64_t) timer_destroy_periodic(a1); 
-		break;
-
-		case GET_TIME:
-			a0 = timer_get_time();
-		break;
+	uint64_t ret = 0;
+	switch(code)
+	{
+		case READ_MHARTID:
+		{
+			ret = read_mhartid();
+			break;
+		}
+		case READ_MTIMECMP:
+		{
+			const uint64_t hart_id = a0; 
+			ret = read_mtimecmp(hart_id);
+			break;
+		}
+		case WRITE_MTIMECMP:
+		{
+			const uint64_t hart_id = a0;
+			const time_t time = a1;
+			write_mtimecmp(hart_id, time);
+			break;
+		}
+		default:
+		{
+			ret = -1;
+			break;
+		}
 	}
 
-	write_sepc((void*)(pc + 4));
-	write_sstatus(sstatus);
+	write_mepc((void*)(pc + 4));
+	write_mstatus(mstatus);
 	
-	return a0;
+	return ret;
 }
 
 void machine_timer_trap_handler()
 {
-		
+	//Machine Timer Interrupt Is handled here.
+	timer_machine_interrupt();
 }
 
 void machine_unknown_trap_handler()

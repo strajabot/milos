@@ -14,8 +14,14 @@ void start()
 	//Flush everything in TLB;
 	sfence_vma_all();
 
-	//delegate interrupts and exceptions to Supervisor mode;
-	write_mideleg(0xFFFFFFFFFFFFFFFF);
+	//Delegate Supervisor Interrupts to Supervisor;
+	write_mideleg(
+		SUPERVISOR_EXT_INTR_MASK |
+		SUPERVISOR_TIMER_INTR_MASK |
+		SUPERVISOR_SOFT_INTR_MASK
+	);
+	//Delegate Supervisor Exceptions to Supervisor;
+	//TODO: Enum MEDELEG values 
 	write_medeleg(0xFFFFFFFFFFFFFFFF);	
 
 	//Hart ID is passed to Supervisor via sscratch;

@@ -58,8 +58,8 @@ inline uint64_t read_mscratch();
 inline void write_mscratch(uint64_t mscratch);
 
 //mepc register helpers
-inline uint64_t read_mepc();
-inline void write_mepc(uint64_t mepc);
+inline void* read_mepc();
+inline void write_mepc(void* mepc);
 
 //mcause register helpers
 #define INTR_MASK 				0x8000000000000000
@@ -124,6 +124,8 @@ inline void* read_satp();
 inline void write_satp(void* satp);
 
 inline void sfence_vma_all();
+
+inline time_t read_time();
 
 //implementation starts here
 inline uint64_t read_mhartid() 
@@ -262,14 +264,14 @@ inline void write_mscratch(uint64_t mscratch)
 	asm volatile("csrw mscratch, %0": : "r"(mscratch));
 }
 
-inline uint64_t read_mepc()
+inline void* read_mepc()
 {
-	uint64_t mepc;
+	void* mepc;
 	asm volatile("csrr %0, mepc": "=r"(mepc));
 	return mepc;
 }
 
-inline void write_mepc(uint64_t mepc)
+inline void write_mepc(void* mepc)
 {
 	asm volatile("csrw mepc, %0": : "r"(mepc));
 }
@@ -374,6 +376,13 @@ inline void write_satp(void* satp)
 inline void sfence_vma_all()
 {
 	asm volatile("sfence.vma x0, x0");
+}
+
+inline time_t read_time()
+{
+	time_t time;
+	asm volatile("rdtime %0": "=r"(time));
+	return time;
 }
 
 #endif // !RISCV_H

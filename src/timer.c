@@ -6,27 +6,27 @@
 #include "../h/spinlock.h"
 
 static volatile uint32_t mutex = 0;
-static uint64_t timer_id = 0;
+static volatile uint64_t timer_id = 0;
 
 //sorted list of (unscheduled) timer interrupt requests
-static timer_t* timer_list = NULL;
+static volatile timer_t* volatile timer_list = NULL;
 
 //maps hart_id -> (scheduled) timer interrupt request
-static timer_t* hart_timer[HART_CNT] = { NULL };
+static volatile timer_t* const hart_timer[HART_CNT] = { NULL };
 
 //provides a timer interrupt after time [ns] 
 uint64_t timer_create(time_t delay)
 {
-	timer_t* timer = (timer_t*) kalloc(sizeof (timer_t));
+	timer_t* timer = (timer_t*) kalloc(sizeof(timer_t));
 	if(timer == NULL) return 0;
 	
-	time_t curr_time = timer_get_time();
+	time_t curr_time = read_time();
 
 	lock(&mutex);
 
 	timer->id = timer_id++;
 	timer->end = curr_time + delay;
-	timer->periodic = 0;
+	timer->period = 0;
 	timer->next = NULL;
 	
 	timer_add(timer);
@@ -35,23 +35,26 @@ uint64_t timer_create(time_t delay)
 	return timer->id;
 }
 
-
+//Must be called inside MUTEX;
+static void timer_queue_periodic(timer_t* timer)
+{
+	time_t curr_time = read_time();
+	timer->end = curr_time + timer->period;
+	timer_add(timer);
+}
 
 uint64_t timer_create_periodic(time_t period)
 {	
 	timer_t* timer = (timer_t*) kalloc(sizeof (timer_t));
 	if(timer == NULL) return 0;
 	
-	time_t curr_time = timer_get_time();
-
 	lock(&mutex);
 
 	timer->id = timer_id++;
-	timer->end = curr_time + period;
-	timer->periodic = 1;
+	timer->period = 1;
 	timer->next = NULL;
-	
-	timer_add(timer);
+
+	timer_queue_periodic(timer);
 
 	unlock(&mutex);
 	return timer->id;
@@ -101,12 +104,6 @@ int timer_destroy_periodic(uint64_t id)
 	unlock(&mutex);
 	return -1;
 }
-
-time_t timer_get_time()
-{
-	//todo: maybe time maybe syscall to machine;
-}
-
 
 //tries to schedule a timer interrupt on one of the harts
 //based on the trigger time. if no sufficient hart is found
@@ -180,25 +177,37 @@ void timer_write(uint32_t hart_id, timer_t* timer)
 	//replace current 
 	hart_timer[hart_id] = timer; 
 	time_t end = timer != NULL? timer->end: UINT64_MAX;
-	machine_call(MCALL_TIMER_WRITE, hart_id, end);
+	mcall_write_mtimecmp(hart_id, end);
 }
 
 
 void timer_supervisor_intr()
 {
-	uint32_t hartid = mcall_get_hartid();
-	//remove head of list;
-}
+	uint32_t hart_id = mcall_read_hartid();
 
-void machine_timer_write(uint32_t hart_id, time_t end)
-{
-	write_mtimecmp(hart_id, end);
-	mask_set_mie(MACHINE_TIMER_INTR_MASK);
+	timer_callback callback = NULL;
+
+	lock(&mutex);
+	
+	timer_t* timer = hart_timer[hart_id];
+	callback = timer->callback;
+
+
+
+	if(timer->periodic)
+		timer_queue_periodic(timer); 
+	
+	unlock(&mutex);
+
+	//if(callback == NULL) 
+		//TODO: panic;
+	
+	callback();
 }
 
 void timer_machine_intr()
 {
 	write_mtimecmp(read_mhartid(), UINT64_MAX);
-	mask_clear_mie(MACHINE_TIMER_INTR_MASK);
+	mask_clear_mip(MACHINE_TIMER_INTR_MASK);
 	mask_set_mip(SUPERVISOR_TIMER_INTR_MASK);
 }
