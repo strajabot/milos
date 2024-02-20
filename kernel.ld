@@ -5,9 +5,9 @@ ENTRY( entry )
 SECTIONS
 {
   . = 0x80000000;
-  kernel_start = .;
+  __kernel_start = .;
 
-  text_start = .;
+  __text_start = .;
   .text : {
     *(.entry)
     . = ALIGN(0x1000);
@@ -15,32 +15,47 @@ SECTIONS
     . = ALIGN(0x1000);
     
   }
-  text_end = .;
+  __text_end = .;
 
+  __rodata_start = .;
   .rodata : {
-    . = ALIGN(16);
     *(.srodata .srodata.*)
     . = ALIGN(16);
     *(.rodata .rodata.*)
+    . = ALIGN(16);
   }
+  __rodata_end = .;
 
-  . = ALIGN(16);
-  data_start = .;
+  __data_start = .;
   .data : {
     *(.sdata .sdata.*)
     . = ALIGN(16);
     *(.data .data.*)
+    . = ALIGN(16);
   }
-  data_end = .;
+  __data_end = .;
 
-  . = ALIGN(16);
-  bss_start = .;
+  __bss_start = .;
   .bss : {
     *(.sbss .sbss.*)
     . = ALIGN(16);
     *(.bss .bss.*)
+    . = ALIGN(16);
   }
-  bss_end = .;
+  __bss_end = .;
 
-  kernel_end = .;
+  . = ALIGN(0x1000);
+
+  __stack_space = .;
+  __stack_size = 0x1000;
+
+  . += 0x10000;
+
+  __kernel_end = .;
+
+  . = ALIGN(0x1000);
+  __heap_start = .;
+
+  __heap_end = __kernel_start + 0x10000000;
+
 }
