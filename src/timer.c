@@ -1,7 +1,7 @@
 #include "../h/timer.h"
 
 #include "../h/hw.h"
-#include "../h/kernel_allocator.h"
+#include "../h/frame_allocator.h"
 #include "../h/riscv.h"
 #include "../h/spinlock.h"
 #include "../h/syscall.h"
@@ -18,7 +18,8 @@ static timer_t* hart_timer[HART_CNT] = { NULL };
 //provides a timer interrupt after time [ns] 
 uint64_t timer_create(time_t delay)
 {
-	timer_t* timer = (timer_t*) kalloc(sizeof(timer_t));
+	//todo: replace with kalloc(sizeof(timer_t))
+	timer_t* timer = (timer_t*) frame_alloc();
 	if(timer == NULL) return 0;
 	
 	time_t curr_time = read_time();
@@ -46,7 +47,8 @@ static void timer_queue_periodic(timer_t* timer)
 
 uint64_t timer_create_periodic(time_t period)
 {	
-	timer_t* timer = (timer_t*) kalloc(sizeof (timer_t));
+	//todo: replace with kalloc(sizeof(timer_t))
+	timer_t* timer = (timer_t*) frame_alloc();
 	if(timer == NULL) return 0;
 	
 	lock(&mutex);
@@ -70,7 +72,8 @@ int timer_destroy_periodic(uint64_t id)
 		if(hart_timer[iter]->id == id)
 		{
 			//remove scheduled interrupt
-			kfree(hart_timer[iter]);
+			//todo: replace with kfree(hart_timer[iter]);
+			frame_free(hart_timer[iter]);
 			hart_timer[iter] = NULL;
 			timer_write(iter, NULL);
 			unlock(&mutex);
@@ -86,7 +89,8 @@ int timer_destroy_periodic(uint64_t id)
 	{
 		//remove from list head
 		timer_list = timer_list->next; 
-		kfree(prev);
+		//todo: replace with kfree(prev);
+		frame_free(prev);
 		unlock(&mutex);
 		return 0;
 	}
@@ -96,7 +100,8 @@ int timer_destroy_periodic(uint64_t id)
 	while(iter != NULL) {
 		if(iter->id == id) {
 			prev->next = iter->next;
-			kfree(iter);
+			//todo: replace with kfree(iter);
+			frame_free(iter);
 			unlock(&mutex);
 			return 0;
 		}
