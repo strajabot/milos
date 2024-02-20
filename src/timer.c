@@ -30,7 +30,7 @@ uint64_t timer_create(time_t delay)
 	timer->end = curr_time + delay;
 	timer->period = 0;
 	timer->next = NULL;
-	
+
 	timer_add(timer);
 
 	unlock(&mutex);
@@ -50,7 +50,7 @@ uint64_t timer_create_periodic(time_t period)
 	//todo: replace with kalloc(sizeof(timer_t))
 	timer_t* timer = (timer_t*) frame_alloc();
 	if(timer == NULL) return 0;
-	
+
 	lock(&mutex);
 
 	timer->id = timer_id++;
@@ -94,7 +94,7 @@ int timer_destroy_periodic(uint64_t id)
 		unlock(&mutex);
 		return 0;
 	}
-	
+
 	timer_t* iter = timer_list->next;
 
 	while(iter != NULL) {
@@ -171,7 +171,7 @@ void timer_list_add(timer_t* timer)
 		iter = next;
 		next = iter->next;
 	}
-		
+
 	iter->next = timer;
 	timer->next = next;
 }
@@ -194,17 +194,17 @@ void timer_supervisor_intr()
 	timer_callback callback = NULL;
 
 	lock(&mutex);
-	
+
 	timer_t* timer = hart_timer[hart_id];
 	callback = timer->callback;
 
 	if(timer->period)
-		timer_queue_periodic(timer); 
-	
+		timer_queue_periodic(timer);
+
 	unlock(&mutex);
 
 	//if(callback == NULL) 
 		//TODO: panic;
-	
+
 	callback(timer);
 }
