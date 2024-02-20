@@ -4,15 +4,16 @@
 #include "../h/kernel_allocator.h"
 #include "../h/riscv.h"
 #include "../h/spinlock.h"
+#include "../h/syscall.h"
 
 static volatile uint32_t mutex = 0;
 static volatile uint64_t timer_id = 0;
 
 //sorted list of (unscheduled) timer interrupt requests
-static volatile timer_t* volatile timer_list = NULL;
+static timer_t* timer_list = NULL;
 
 //maps hart_id -> (scheduled) timer interrupt request
-static volatile timer_t* const hart_timer[HART_CNT] = { NULL };
+static timer_t* hart_timer[HART_CNT] = { NULL };
 
 //provides a timer interrupt after time [ns] 
 uint64_t timer_create(time_t delay)
@@ -71,7 +72,7 @@ int timer_destroy_periodic(uint64_t id)
 			//remove scheduled interrupt
 			kfree(hart_timer[iter]);
 			hart_timer[iter] = NULL;
-			timer_sched(iter);
+			timer_write(iter, NULL);
 			unlock(&mutex);
 			return 0;
 		}
@@ -177,13 +178,13 @@ void timer_write(uint32_t hart_id, timer_t* timer)
 	//replace current 
 	hart_timer[hart_id] = timer; 
 	time_t end = timer != NULL? timer->end: UINT64_MAX;
-	mcall_write_mtimecmp(hart_id, end);
+	write_mtimecmp(hart_id, end);
 }
 
 
 void timer_supervisor_intr()
 {
-	uint32_t hart_id = mcall_read_hartid();
+	uint32_t hart_id = read_mhartid();
 
 	timer_callback callback = NULL;
 
@@ -202,12 +203,5 @@ void timer_supervisor_intr()
 	//if(callback == NULL) 
 		//TODO: panic;
 	
-	callback();
-}
-
-void timer_machine_intr()
-{
-	write_mtimecmp(read_mhartid(), UINT64_MAX);
-	mask_clear_mip(MACHINE_TIMER_INTR_MASK);
-	mask_set_mip(SUPERVISOR_TIMER_INTR_MASK);
+	callback(timer);
 }
