@@ -1,7 +1,7 @@
 #include "../h/riscv.h"
 #include "../h/types.h"
-#include "../h/main.h"
 
+extern int main();
 
 void start()
 {

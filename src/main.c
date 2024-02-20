@@ -1,5 +1,3 @@
-#include "../h/main.h"
-
 #include "../h/frame_allocator.h"
 
 int main()
