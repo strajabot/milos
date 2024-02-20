@@ -1,19 +1,20 @@
+#define HART_CNT 4
+#define PAGE_SIZE 0x1000
+
+#define CLINT_MSIP 0x2000000
+#define CLINT_MTIME 0x200BFF8
+#define CLINT_MTIMECMP 0x2004000
+
+#ifndef __ASSEMBLER__
+
 #ifndef HW_H
 #define HW_H
 
 #include "types.h"
 
-#define HART_CNT 4
-#define PAGE_SIZE 0x1000
 
-#define CLINT 0x2000000
-#define CLINT_MTIME ((time_t*)((char*)CLINT + 0xBFF8))
 
-//msip is mapped into 4 byte word
-#define CLINT_MSIP(hart_id) ((volatile uint32_t*)((char*)CLINT + 4*hart_id))
 
-//mtimecmp is mapped into 8 byte word;
-#define CLINT_MTIMECMP(hart_id) ((volatile uint64_t*)(char*)CLINT + 0x4000 + 8*hart_id)
 
 extern void* HEAP_START[];
 extern void* HEAP_END[];
@@ -25,3 +26,4 @@ extern void* HEAP_END[];
 #define HEAP_END_ALIGNED PAGE_FLOOR(HEAP_END)
 
 #endif // !HW_H
+#endif // !__ASSEMBLER__
