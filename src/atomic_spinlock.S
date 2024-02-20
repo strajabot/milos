@@ -1,10 +1,10 @@
-.globl lock
-.globl unlock
+.globl atomic_lock
+.globl atomic_unlock
 
-.local loop
+.local wait_lock
 .local unlock_fail
 
-lock:
+atomic_lock:
     li t0, 1
 wait_lock:
     lw t1, (a0)
@@ -13,7 +13,7 @@ wait_lock:
     bnez t1, wait_lock
     ret
 
-unlock:
+atomic_unlock:
     lw t0, (a0) 
     beqz t0, unlock_fail
     amoswap.w.rl x0, x0, (a0)
