@@ -57,10 +57,10 @@ void start()
 	mask_set_mstatus(MSTATUS_MPP_SUPERVISOR);
 
 	//Setup jump to main; 
-	write_sepc(main);
+	write_mepc(main);
 
 	//Drop to supervisor, jump to main();
 	mret();
-	
+
 	return;
 }
