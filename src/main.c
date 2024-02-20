@@ -1,3 +1,5 @@
+#include "../h/types.h"
+#include "../h/riscv.h"
 #include "../h/frame_allocator.h"
 
 int main()
