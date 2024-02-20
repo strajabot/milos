@@ -193,9 +193,7 @@ void timer_supervisor_intr()
 	timer_t* timer = hart_timer[hart_id];
 	callback = timer->callback;
 
-
-
-	if(timer->periodic)
+	if(timer->period)
 		timer_queue_periodic(timer); 
 	
 	unlock(&mutex);
