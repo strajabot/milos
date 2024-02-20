@@ -12,18 +12,33 @@
 
 #include "types.h"
 
+extern void* __kernel_start[];
 
+extern void* __text_start[];
+extern void* __text_end[];
 
+extern void* __rodata_start[];
+extern void* __rodata_end[];
 
+extern void* __data_start[];
+extern void* __data_end[];
 
-extern void* HEAP_START[];
-extern void* HEAP_END[];
+extern void* __data_start[];
+extern void* __data_end[];
+
+extern void* __bss_start[];
+extern void* __bss_end[];
+
+extern void* __kernel_end[];
+
+extern void* __heap_start[];
+extern void* __heap_end[];
 
 #define PAGE_CEIL(ptr) ((void*)(((uint64_t)ptr + PAGE_SIZE-1) & ~(PAGE_SIZE-1)))
 #define PAGE_FLOOR(ptr) ((void*)((uint64_t)ptr & ~(PAGE_SIZE-1)))
 
-#define HEAP_START_ALIGNED PAGE_CEIL(HEAP_START)
-#define HEAP_END_ALIGNED PAGE_FLOOR(HEAP_END)
+#define HEAP_START_ALIGNED PAGE_CEIL(__heap_start)
+#define HEAP_END_ALIGNED PAGE_FLOOR(__heap_end)
 
 #endif // !HW_H
 #endif // !__ASSEMBLER__
