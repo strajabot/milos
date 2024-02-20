@@ -7,7 +7,7 @@ typedef struct free_frame {
 
 void frame_allocator_init();
 void* frame_alloc();
-void frames_free(void* ptr);
+void frame_free(void* ptr);
 
 #endif // !FRAME_ALLOCATOR_H
 
