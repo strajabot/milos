@@ -3,11 +3,11 @@
 .align 4
 supervisor_trap:
     j supervisor_internal_trap
+    j supervisor_unknown_trap
+    j supervisor_unknown_trap
+    j supervisor_unknown_trap
+    j supervisor_unknown_trap
     j supervisor_timer_trap
-    j supervisor_unknown_trap
-    j supervisor_unknown_trap
-    j supervisor_unknown_trap
-    j supervisor_unknown_trap
     j supervisor_unknown_trap
     j supervisor_unknown_trap
     j supervisor_unknown_trap
