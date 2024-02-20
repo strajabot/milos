@@ -31,13 +31,13 @@ entry:
     andi sp, sp, ~0b1111
     
     csrr a0, mhartid
-    ld t0, __stack_size
+    la t0, __stack_size
     andi t0, t0, ~0b1111;
     
     mv t1, zero
 loop:
-    beq a0, t1, done
     add sp, sp, t0
+    beq a0, t1, done
     addi t1, t1, 1
     j loop;
 
