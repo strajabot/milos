@@ -1,3 +1,12 @@
+#define UINT64_MAX	0xFFFFFFFFFFFFFFFF
+#define UINT32_MAX	0xFFFFFFFF
+#define UINT16_MAX	0xFFFF
+#define UINT8_MAX	0xFF
+
+#define NULL 0
+
+#ifndef __ASSEMBLER__
+
 #ifndef TYPES_H
 #define TYPES_H
 
@@ -8,11 +17,5 @@ typedef unsigned char uint8_t;
 typedef char bool_t;
 typedef uint64_t time_t;
 
-#define UINT64_MAX	0xFFFFFFFFFFFFFFFF
-#define UINT32_MAX	0xFFFFFFFF
-#define UINT16_MAX	0xFFFF
-#define UINT8_MAX	0xFF
-
-#define NULL 0
-
 #endif // !TYPES_H
+#endif // !__ASSEMBLER__ 
