@@ -86,7 +86,6 @@ clean:
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg
 	rm -f ${KERNEL_IMG} ${KERNEL_ASM}
 	rm -fr ${DIR_BUILD}
-	rm -f .gdbinit
 
 OCD_PORT = 26000
 
