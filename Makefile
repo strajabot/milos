@@ -3,7 +3,9 @@ DIR_BUILD = build
 DIR_INCLUDE = h
 DIR_SOURCE = src
 
-RISCV_ISA = rv64imac
+RISCV_ISA = rv64ima
+HART_COUNT = 1
+
 DEBUG_FLAG = -D__DEBUG__ -D__DEBUG_LEVEL__=0
 KERNEL_IMG = kernel
 KERNEL_ASM = kernel.asm
@@ -88,9 +90,7 @@ clean:
 
 OCD_PORT = 26000
 
-HART_COUNT = 1
-
-SPIKE_OPTS = --kernel=${KERNEL_IMG} --isa=${RISCV_ISA} -m128 -p${HART_COUNT}
+SPIKE_OPTS = --isa=${RISCV_ISA} -m256 -p${HART_COUNT} ${KERNEL_IMG}
 SPIKE_DEBUG = -d
 SPIKE_OCD = --rbb-port=${OCD_PORT}
 
@@ -105,6 +105,19 @@ spike-debug: ${KERNEL_IMG}
 spike-ocd: ${KERNEL_IMG}
 	@echo "Starting SPIKE RISC-V Simulator in DEBUG Mode, Waiting on: \"localhost:${OCD_PORT}\""
 	spike ${SPIKE_OPTS} ${SPIKE_OCD} ${KERNEL_IMG}
+
+GDBPORT = 26000
+QEMU = qemu-system-riscv64
+QEMUOPTS = -machine virt -bios none -kernel kernel -m 256M -smp $(HART_COUNT) -nographic
+QEMUGDB =  -gdb tcp::$(GDBPORT) 
+
+qemu: ${KERNEL_IMG}
+	@echo "Starting QEMU RISC-V Emulator"
+	$(QEMU) $(QEMUOPTS)
+
+qemu-gdb: ${KERNEL_IMG} 
+	@echo "Starting QEMU RISC-V Emulator in DEBUG Mode"
+	$(QEMU) $(QEMUOPTS) -S $(QEMUGDB)
 
 # Prevent deletion of intermediate files, e.g. cat.o, after first build, so
 # that disk image changes after first build are persistent until clean.
