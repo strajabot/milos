@@ -1,135 +1,132 @@
+#include "../h/types.h"
+#include "../h/hw.h"
+#include "../h/riscv.h"
+
 .globl machine_trap
 
 .align 4
 machine_trap:
     j machine_internal_trap
+    j machine_unknown_trap
+    j machine_unknown_trap
+    j machine_unknown_trap
+    j machine_unknown_trap
+    j machine_unknown_trap
+    j machine_unknown_trap
     j machine_timer_trap
-    j machine_unknown_trap
-    j machine_unknown_trap
-    j machine_unknown_trap
-    j machine_unknown_trap
-    j machine_unknown_trap
-    j machine_unknown_trap
     j machine_unknown_trap
     j machine_unknown_trap
 
 .align 4
 machine_internal_trap:
-    addi sp, sp, -120
+    #check if trap was caused by supervisor trap
+    #otherwise call fault handler
+    csrr t0, sstatus
+    li t1, SUPERVISOR_ECALL
+    bne t0, t1, machine_fault_trap
 
-    sd ra,  112(sp)
-    sd fp,  104(sp)
-    sd gp,  96(sp)
-    sd tp,  88(sp)
-    sd s1,  80(sp)
-    sd s2,  72(sp)
-    sd s3,  64(sp)
-    sd s4,  56(sp)
-    sd s5,  48(sp)
-    sd s6,  40(sp)
-    sd s7,  32(sp)
-    sd s8,  24(sp)
-    sd s9,  16(sp)
-    sd s10, 8(sp)
-    sd s11, 0(sp)
+    #(a0: opcode, a1-a7: args)
+    #increase sepc 
+    csrr t0, sepc
+    addi t0, t0, 4
+    csrw sepc, t0
 
-    addi fp, sp, 120
+    la t0, scall_jump_table
+    #load jump table offset
+    andi a0, a0, 0xf
+    add t0, t0, a0
+    jr t0
 
-    call machine_internal_trap_handler
+.align 4
+scall_jump_table:
+    j scall_read_mhartid  
+    j scall_read_mtime
+    j scall_write_mtime
+    j scall_read_mtimecmp
+    j scall_write_mtimecmp
+    j scall_illegal
+    j scall_illegal
+    j scall_illegal
+    j scall_illegal
+    j scall_illegal
+    j scall_illegal
+    j scall_illegal
+    j scall_illegal
+    j scall_illegal
+    j scall_illegal
+    j scall_illegal
+    
+.align 4
+scall_read_mhartid:
+    csrr a0, mhartid
+    mret
 
-    ld ra,  112(sp)
-    ld fp,  104(sp)
-    ld gp,  96(sp)
-    ld tp,  88(sp)
-    ld s1,  80(sp)
-    ld s2,  72(sp)
-    ld s3,  64(sp)
-    ld s4,  56(sp)
-    ld s5,  48(sp)
-    ld s6,  40(sp)
-    ld s7,  32(sp)
-    ld s8,  24(sp)
-    ld s9,  16(sp)
-    ld s10, 8(sp)
-    ld s11, 0(sp)
+.align 4
+scall_read_mtime:
+    li t0, CLINT_MTIME
+    ld a0, (t0)
+    mret
 
-    addi sp, sp, 120
+.align 4
+scall_write_mtime:
+    li t0, CLINT_MTIME
+    sd a1, (t0)
+    mret
 
-    sret
+.align 4
+scall_read_mtimecmp:
+    #todo: bounds check a1
+    li t0, CLINT_MTIMECMP
+    slli a1, a1, 3
+    add t0, t0, a1
+    ld a0, (t0)
+    mret
+
+.align 4
+scall_write_mtimecmp:
+    #todo: bounds check a1
+    li t0, CLINT_MTIMECMP
+    slli a1, a1, 3
+    add t0, t0, a1
+    sd a2, (t0)
+    mret
+    
+.align 4
+scall_illegal:
+    #todo: kernel oops.
+    ebreak;
+
+.align 4
+machine_fault_trap:
+    #todo: kernel oops.
+    ebreak;
 
 .align 4
 machine_timer_trap:
-    addi sp, sp, -240
+    #todo: alloc extra space to save t0 and t1
+    addi sp, sp, -16
     
-    sd ra,  232(sp)
-    sd fp,  224(sp)
-    sd gp,  216(sp)
-    sd tp,  208(sp)
-    sd s1,  200(sp)
-    sd s2,  192(sp)
-    sd s3,  184(sp)
-    sd s4,  176(sp)
-    sd s5,  168(sp)
-    sd s6,  160(sp)
-    sd s7,  152(sp)
-    sd s8,  144(sp)
-    sd s9,  136(sp)
-    sd s10, 128(sp)
-    sd s11, 120(sp)
-    sd a0,  112(sp)
-    sd a1,  104(sp)
-    sd a2,  96(sp)
-    sd a3,  88(sp)
-    sd a4,  80(sp)
-    sd a5,  72(sp)
-    sd a6,  64(sp)
-    sd a7,  56(sp)
-    sd t0,  48(sp)
-    sd t1,  40(sp)
-    sd t2,  32(sp)
-    sd t3,  24(sp)
-    sd t4,  16(sp)
-    sd t5,  8(sp)
-    sd t6,  0(sp)
+    sd t0,  8(sp)
+    sd t1,  0(sp)
 
-    addi fp, sp, 240
+    csrr t0, mhartid
+    # clear machine mode interrupt;
+    li t1, CLINT_MTIMECMP
+    slli t0, t0, 3
+    add t1, t1, t0
+    li t0, UINT64_MAX
+    sd t0, (t1)
 
-    call machine_timer_trap_handler
+    # delegate interrupt to supervisor mode;
+    li t0, SUPERVISOR_TIMER_INTR_MASK
+    csrs mip, t0
 
-    ld ra,  232(sp)
-    ld fp,  224(sp)
-    ld gp,  216(sp)
-    ld tp,  208(sp)
-    ld s1,  200(sp)
-    ld s2,  192(sp)
-    ld s3,  184(sp)
-    ld s4,  176(sp)
-    ld s5,  168(sp)
-    ld s6,  160(sp)
-    ld s7,  152(sp)
-    ld s8,  144(sp)
-    ld s9,  136(sp)
-    ld s10, 128(sp)
-    ld s11, 120(sp)
-    ld a0,  112(sp)
-    ld a1,  104(sp)
-    ld a2,  96(sp)
-    ld a3,  88(sp)
-    ld a4,  80(sp)
-    ld a5,  72(sp)
-    ld a6,  64(sp)
-    ld a7,  56(sp)
-    ld t0,  48(sp)
-    ld t1,  40(sp)
-    ld t2,  32(sp)
-    ld t3,  24(sp)
-    ld t4,  16(sp)
-    ld t5,  8(sp)
-    ld t6,  0(sp)
+    ld t0,  8(sp)
+    ld t1,  0(sp)
+    
+    addi sp, sp, 16
 
-    addi sp, sp, 240 
-
-    sret
+    mret
 
 .align 4
 machine_unknown_trap:
@@ -167,41 +164,6 @@ machine_unknown_trap:
     sd t6,  0(sp)
 
     addi fp, sp, 240
-
-    call machine_unknown_trap_handler
-
-    ld ra,  232(sp)
-    ld fp,  224(sp)
-    ld gp,  216(sp)
-    ld tp,  208(sp)
-    ld s1,  200(sp)
-    ld s2,  192(sp)
-    ld s3,  184(sp)
-    ld s4,  176(sp)
-    ld s5,  168(sp)
-    ld s6,  160(sp)
-    ld s7,  152(sp)
-    ld s8,  144(sp)
-    ld s9,  136(sp)
-    ld s10, 128(sp)
-    ld s11, 120(sp)
-    ld a0,  112(sp)
-    ld a1,  104(sp)
-    ld a2,  96(sp)
-    ld a3,  88(sp)
-    ld a4,  80(sp)
-    ld a5,  72(sp)
-    ld a6,  64(sp)
-    ld a7,  56(sp)
-    ld t0,  48(sp)
-    ld t1,  40(sp)
-    ld t2,  32(sp)
-    ld t3,  24(sp)
-    ld t4,  16(sp)
-    ld t5,  8(sp)
-    ld t6,  0(sp)
-
-    addi sp, sp, 240 
-
-    sret
+    #todo: kernel oops
+    ebreak
 
