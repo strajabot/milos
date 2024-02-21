@@ -38,7 +38,7 @@ FLAGS_AS = -march=${RISCV_ISA} -mabi=lp64
 
 FLAGS_CC  = -Wall -Og -ggdb
 FLAGS_CC += -nostdlib
-FLAGS_CC += -march=${RISCV_ISA} -mabi=lp64 -mcmodel=medany -mno-relax
+FLAGS_CC += -march=${RISCV_ISA} -mabi=lp64 -mcmodel=medany -mrelax
 FLAGS_CC += -fno-omit-frame-pointer -ffreestanding -fno-common
 FLAGS_CC += $(shell ${CC} -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 FLAGS_CC += ${DEBUG_FLAG}

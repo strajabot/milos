@@ -28,6 +28,7 @@ SECTIONS
 
   __data_start = .;
   .data : {
+    __global_pointer = . + 0x800;
     *(.sdata .sdata.*)
     . = ALIGN(16);
     *(.data .data.*)

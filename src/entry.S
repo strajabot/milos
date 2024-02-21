@@ -44,12 +44,11 @@ entry:
 
     #Physical Memory Protection END
 
-    #todo: setup linker to emit global pointer.
     #Setup Global Pointer;
     .option push
     #norelax needs to be enabled to change global pointer;
     .option norelax
-    #la gp, __global_pointer
+    la gp, __global_pointer
     .option pop
 
     #Setup vectored machine mode trap table;
