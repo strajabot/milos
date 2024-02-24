@@ -27,9 +27,9 @@ machine_internal_trap:
 
     #(a0: opcode, a1-a7: args)
     #increase sepc 
-    csrr t0, sepc
+    csrr t0, mepc
     addi t0, t0, 4
-    csrw sepc, t0
+    csrw mepc, t0
 
     la t0, scall_jump_table
     #load jump table offset
