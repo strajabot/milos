@@ -34,6 +34,7 @@ machine_internal_trap:
     la t0, scall_jump_table
     #load jump table offset
     andi a0, a0, 0xf
+    slli a0, a0, 2
     add t0, t0, a0
     jr t0
 
