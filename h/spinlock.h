@@ -6,7 +6,7 @@
 typedef struct spinlock {
 	uint32_t raw_lock;
 	uint32_t hart_id;
-	char* name;
+	char name[64];
 } spinlock_t;
 
 //Returns when lock is acquired
