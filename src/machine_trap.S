@@ -21,7 +21,7 @@ machine_trap:
 machine_internal_trap:
     #check if trap was caused by supervisor trap
     #otherwise call fault handler
-    csrr t0, sstatus
+    csrr t0, mcause
     li t1, SUPERVISOR_ECALL
     bne t0, t1, machine_fault_trap
 
