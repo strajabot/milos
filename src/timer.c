@@ -6,7 +6,7 @@
 #include "../h/spinlock.h"
 #include "../h/syscall.h"
 
-static volatile uint32_t mutex = 0;
+static spinlock_t mutex = { NULL };
 static volatile uint64_t timer_id = 0;
 
 //sorted list of (unscheduled) timer interrupt requests
