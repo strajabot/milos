@@ -183,13 +183,13 @@ void timer_write(uint32_t hart_id, timer_t* timer)
 	//replace current 
 	hart_timer[hart_id] = timer; 
 	time_t end = timer != NULL? timer->end: UINT64_MAX;
-	write_mtimecmp(hart_id, end);
+	sys_write_mtimecmp(hart_id, end);
 }
 
 
 void timer_supervisor_intr()
 {
-	uint32_t hart_id = read_mhartid();
+	uint32_t hart_id = sys_read_mhartid();
 
 	timer_callback callback = NULL;
 

@@ -13,11 +13,11 @@
 
 #include "types.h"
 
-uint64_t	read_mhartid();
-uint64_t	read_mtime();
-void		write_mtime(uint64_t mtime);
-uint64_t	read_mtimecmp(uint64_t hart_id);
-void		write_mtimecmp(uint64_t hart_id, uint64_t mtimecmp);
+uint64_t	sys_read_mhartid();
+uint64_t	sys_read_mtime();
+void		sys_write_mtime(uint64_t mtime);
+uint64_t	sys_read_mtimecmp(uint64_t hart_id);
+void		sys_write_mtimecmp(uint64_t hart_id, uint64_t mtimecmp);
 
 #endif //!SYSCALL_H
 #endif //!__ASSEMBLER__

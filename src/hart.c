@@ -1,5 +1,6 @@
 #include "../h/hart.h"
 #include "../h/debug.h"
+#include "../h/syscall.h"
 
 hart_t harts[HART_CNT] = { 0 };
 
@@ -12,5 +13,5 @@ hart_t* hart_get(uint32_t hart_id)
 
 hart_t* hart_curr()
 {
-	return hart_get(read_mhartid());
+	return hart_get(sys_read_mhartid());
 }
