@@ -76,7 +76,8 @@ scall_write_mtime:
 
 .align 4
 scall_read_mtimecmp:
-    #todo: bounds check a1
+    li t1, HART_CNT
+    jge a1, t1, scall_error
     li t0, CLINT_MTIMECMP
     slli a1, a1, 3
     add t0, t0, a1
@@ -85,7 +86,8 @@ scall_read_mtimecmp:
 
 .align 4
 scall_write_mtimecmp:
-    #todo: bounds check a1
+    li t1, HART_CNT
+    jge a1, t1, scall_error
     li t0, CLINT_MTIMECMP
     slli a1, a1, 3
     add t0, t0, a1
@@ -95,12 +97,16 @@ scall_write_mtimecmp:
 .align 4
 scall_illegal:
     #todo: kernel oops.
-    ebreak;
+    ebreak
+
+scall_error:
+    #todo: kernel oops.
+    ebreak
 
 .align 4
 machine_fault_trap:
     #todo: kernel oops.
-    ebreak;
+    ebreak
 
 .align 4
 machine_timer_trap:
